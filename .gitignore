@@ -1,0 +1,4 @@
+*.exe
+*.win
+*.layout
+/obj/
