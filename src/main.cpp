@@ -1,7 +1,7 @@
 #include "pch.hpp"
 #include "server.hpp"
 
-uint32_t device;
+uint32_t device = 1;
 
 int main(void) {
 	if (!isVBusExists()) {
@@ -9,15 +9,15 @@ int main(void) {
 		return 1;
 	}
 	
-	for (device = 1; device < 5; device++) {
-		if (PlugIn(device)) {
-			break;
-		} else if (device == 4) {
-			std::cout << "Failed to plug in device." << std::endl;
+    while (!PlugIn(device)) {
+        if (device == 4) {
+            std::cout << "Failed to plug in device." << std::endl;
 			return 1;
-		}
-	}
-	
+        }
+        
+        device++;
+    }
+    
 	startServer();
 	
 	if (!UnPlug(device)) {
