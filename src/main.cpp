@@ -8,25 +8,25 @@ int main(void) {
 		std::cout << "ScpVBus driver not installed." << std::endl;
 		return 1;
 	}
-	
-    while (!PlugIn(device)) {
-        if (device == 4) {
-            std::cout << "Failed to plug in device." << std::endl;
+
+	while (!PlugIn(device)) {
+		if (device == 4) {
+			std::cout << "Failed to plug in device." << std::endl;
 			return 1;
-        }
-        
-        device++;
-    }
-    
+		}
+
+		device++;
+	}
+
 	startServer();
-	
+
 	if (!UnPlug(device)) {
 		if (!UnPlugForce(device)) {
 			std::cout << "Failed to unplug device." << std::endl;
 			return 1;
 		}
 	}
-	
+
 	return 0;
 }
 
