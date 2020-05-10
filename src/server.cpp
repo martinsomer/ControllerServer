@@ -81,16 +81,13 @@ void startServer(void) {
 	while (true) {
 		int8_t length = recvfrom(ServerSocket, data, sizeof(data), 0, NULL, NULL);
 
-		if (length > 0) {
-			if (length == 1 && data[0] == -1) {
-				std::cout << "Device disconnected." << std::endl;
-				break;
-			}
-
+		if (length == 18) {
 			boost::async(boost::launch::async, [&data] {
 				emulate(data);
 			});
-
+		} else if (length == 1 && data[0] == -1) {
+			std::cout << "Device disconnected." << std::endl;
+			break;
 		} else if (length < 0) {
 			std::cout << "Failed to read from the socket. Code: " << WSAGetLastError() << std::endl;
 			break;
