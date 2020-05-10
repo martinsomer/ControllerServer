@@ -1,3 +1,11 @@
+/*
+ * This is the main program.
+ *
+ * It checks if ScpVBus driver is installed, then creates
+ * a virtual controller, and finally starts the server.
+ * The controller is disconnected upon program termination.
+ */
+
 #include "pch.hpp"
 #include "server.hpp"
 

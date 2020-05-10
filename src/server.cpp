@@ -1,3 +1,15 @@
+/*
+ * This is the server program.
+ *
+ * It creates a UDP server and waits for packets from the client.
+ * When a packet is received, the server determines
+ * if it is a disconnect message, or contains
+ * valid data to be asynchronously emulated.
+ *
+ * The port number of the server is selected
+ * automatically, and is displayed in the console window.
+ */
+
 #include "pch.hpp"
 #include "emulator.hpp"
 

@@ -1,3 +1,10 @@
+/*
+ * This is the emulator program.
+ *
+ * When receiving data from the server, corresponding
+ * buttons are pressed on the virtual controller.
+ */
+
 #include "pch.hpp"
 
 extern uint32_t device;
