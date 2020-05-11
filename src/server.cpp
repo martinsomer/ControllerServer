@@ -8,6 +8,9 @@
  *
  * The port number of the server is selected
  * automatically, and is displayed in the console window.
+ *
+ * This program is based on Microsoft's Winsock server code example.
+ * https://docs.microsoft.com/en-us/windows/win32/winsock/complete-server-code
  */
 
 #include "pch.hpp"
