@@ -17,6 +17,8 @@ Projekt on loodud Martin Sõmeri poolt Tallinna Ülikooli bakalaureusetöö raam
 * Lisa serveriprogrammi jaoks tulemüüri erand
 * Ava serveriprogramm
 * Loo ühendus [rakendusega](https://github.com/martinsomer/controller)
+    * IPv4 aadress on leitav `ipconfig` käsuga
+    * Pordinumber kuvatakse serveriprogrammi käivitamisel
 
 ## Ekraanipildid
 ![Screenshot](img/1588709760.png)
