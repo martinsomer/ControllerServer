@@ -9,7 +9,7 @@
 #include "pch.hpp"
 #include "server.hpp"
 
-uint32_t device = 1;
+UINT device = 1;
 
 int main(void) {
 	if (!isVBusExists()) {

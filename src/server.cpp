@@ -18,10 +18,11 @@
 
 void startServer(void) {
 	WSADATA wsaData;
-	uint32_t res;
+	int res;
 	SOCKET ServerSocket = INVALID_SOCKET;
 	struct addrinfo hints;
 	struct addrinfo *result = NULL;
+
 	struct sockaddr_in sin;
 	socklen_t len = sizeof(sin);
 
@@ -82,16 +83,16 @@ void startServer(void) {
 	// Receive until disconnect command is received
 	char data[18];
 	while (true) {
-		int8_t length = recvfrom(ServerSocket, data, sizeof(data), 0, NULL, NULL);
+		res = recvfrom(ServerSocket, data, sizeof(data), 0, NULL, NULL);
 
-		if (length == 18) {
+		if (res == 18) {
 			boost::async(boost::launch::async, [&data] {
 				emulate(data);
 			});
-		} else if (length == 1 && data[0] == -1) {
+		} else if (res == 1 && data[0] == -1) {
 			std::cout << "Device disconnected." << std::endl;
 			break;
-		} else if (length < 0) {
+		} else if (res < 0) {
 			std::cout << "Failed to read from the socket. Code: " << WSAGetLastError() << std::endl;
 			break;
 		}
