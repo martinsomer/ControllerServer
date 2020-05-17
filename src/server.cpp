@@ -9,22 +9,63 @@
  * The port number of the server is selected
  * automatically, and is displayed in the console window.
  *
- * This program is based on Microsoft's Winsock server code example.
+ * This program is based on Microsoft's examples.
  * https://docs.microsoft.com/en-us/windows/win32/winsock/complete-server-code
+ * https://docs.microsoft.com/en-us/windows/win32/api/iphlpapi/nf-iphlpapi-getadaptersinfo
  */
 
 #include "pch.hpp"
 #include "emulator.hpp"
 
+int getServerIpAddress(std::string &ipAddress) {
+	PIP_ADAPTER_INFO adapterInfo;
+	ULONG size = 0;
+	DWORD res;
+
+	// Retrieve adapter information 
+	while (true) {
+		adapterInfo = (IP_ADAPTER_INFO *) malloc(size);
+		if (adapterInfo == NULL) {
+			return 10;
+		}
+
+		res = GetAdaptersInfo(adapterInfo, &size);
+		if (res == NO_ERROR) {
+			break;
+		}
+
+		free(adapterInfo);
+		if (res != ERROR_BUFFER_OVERFLOW) {
+			return 11;
+		}
+	}
+
+	// Loop over adapters to find suitable IPv4 address
+	while (adapterInfo) {
+		ipAddress = adapterInfo->IpAddressList.IpAddress.String;
+		if (ipAddress != "0.0.0.0") {
+			free(adapterInfo);
+			return 0;
+		}
+
+		adapterInfo = adapterInfo->Next;
+	}
+
+	// No suitable address found
+	free(adapterInfo);
+	return 12;
+}
+
 void startServer(void) {
 	WSADATA wsaData;
 	int res;
-	SOCKET ServerSocket = INVALID_SOCKET;
+	SOCKET serverSocket = INVALID_SOCKET;
 	struct addrinfo hints;
 	struct addrinfo *result = NULL;
 
-	struct sockaddr_in sin;
-	socklen_t len = sizeof(sin);
+	std::string ipAddress;
+	struct sockaddr_in sockname;
+	socklen_t socknameLen = sizeof(sockname);
 
 	// Initialize Winsock
 	res = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -48,8 +89,8 @@ void startServer(void) {
 	}
 
 	// Create a SOCKET for connecting to server
-	ServerSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	if (ServerSocket == INVALID_SOCKET) {
+	serverSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (serverSocket == INVALID_SOCKET) {
 		std::cout << "Failed to create socket. Code: " << WSAGetLastError() << std::endl;
 		freeaddrinfo(result);
 		WSACleanup();
@@ -57,33 +98,41 @@ void startServer(void) {
 	}
 
 	// Set up the listening socket
-	res = bind(ServerSocket, result->ai_addr, (int)result->ai_addrlen);
+	res = bind(serverSocket, result->ai_addr, (int)result->ai_addrlen);
 	if (res == SOCKET_ERROR) {
 		std::cout << "Failed to bind socket. Code: " << WSAGetLastError() << std::endl;
 		freeaddrinfo(result);
-		closesocket(ServerSocket);
+		closesocket(serverSocket);
 		WSACleanup();
 		return;
 	}
 
-	freeaddrinfo(result);
+	// Get server IP address
+	res = getServerIpAddress(ipAddress);
+	if (res != 0) {
+		std::cout << "Failed to retrieve IP address. Code: " << res << std::endl;
+		freeaddrinfo(result);
+		closesocket(serverSocket);
+		WSACleanup();
+		return;
+	}
 
 	// Get server port
-	res = getsockname(ServerSocket, (struct sockaddr *)&sin, &len);
+	res = getsockname(serverSocket, (struct sockaddr *)&sockname, &socknameLen);
 	if (res != 0) {
 		std::cout << "Failed to retrieve socket name. Code: " << WSAGetLastError() << std::endl;
 		freeaddrinfo(result);
-		closesocket(ServerSocket);
+		closesocket(serverSocket);
 		WSACleanup();
 		return;
 	}
 
-	std::cout << "Server running on port " << ntohs(sin.sin_port) << std::endl;
+	std::cout << "Server running on " << ipAddress << ":" << ntohs(sockname.sin_port) << std::endl;
 
 	// Receive until disconnect command is received
 	char data[18];
 	while (true) {
-		res = recvfrom(ServerSocket, data, sizeof(data), 0, NULL, NULL);
+		res = recvfrom(serverSocket, data, sizeof(data), 0, NULL, NULL);
 
 		if (res == 18) {
 			boost::async(boost::launch::async, [&data] {
@@ -99,7 +148,9 @@ void startServer(void) {
 	}
 
 	// Cleanup
-	res = closesocket(ServerSocket);
+	freeaddrinfo(result);
+	
+	res = closesocket(serverSocket);
 	if (res != 0) {
 		std::cout << "Failed to close socket. Code: " << WSAGetLastError() << std::endl;
 	}
