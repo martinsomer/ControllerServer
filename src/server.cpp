@@ -19,6 +19,7 @@
 
 int getServerIpAddress(std::string &ipAddress) {
 	PIP_ADAPTER_INFO adapterInfo;
+	PIP_ADAPTER_INFO adapter;
 	ULONG size = 0;
 	DWORD res;
 
@@ -41,14 +42,15 @@ int getServerIpAddress(std::string &ipAddress) {
 	}
 
 	// Loop over adapters to find suitable IPv4 address
-	while (adapterInfo) {
-		ipAddress = adapterInfo->IpAddressList.IpAddress.String;
+	adapter = adapterInfo;
+	while (adapter) {
+		ipAddress = adapter->IpAddressList.IpAddress.String;
 		if (ipAddress != "0.0.0.0") {
 			free(adapterInfo);
 			return 0;
 		}
 
-		adapterInfo = adapterInfo->Next;
+		adapter = adapter->Next;
 	}
 
 	// No suitable address found
