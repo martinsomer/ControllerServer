@@ -27,8 +27,8 @@ void emulate(char *data) {
 	SetDpad(device, flags);
 
 	SetBtnY(device, data[10]);
-	SetBtnB(device, data[12]);
-	SetBtnX(device, data[11]);
+	SetBtnB(device, data[11]);
+	SetBtnX(device, data[12]);
 	SetBtnA(device, data[13]);
 
 	SetAxisX(device, (SHORT) (data[14] / 127.0 * 32767));
